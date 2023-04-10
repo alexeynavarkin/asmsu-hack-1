@@ -1,5 +1,5 @@
 import sys
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 import logging
 
 from task import Task
@@ -44,7 +44,7 @@ def main():
 
     q = []
     res = []
-    with Pool(processes=8) as pool:
+    with Pool(processes=int(cpu_count() * 0.75)) as pool:
         for comb in gen_combinations(containers_sizes, len(matrix)):
             logging.info(f"Start solving: {comb}")
             res.append(pool.apply_async(solve, (matrix, comb)))
