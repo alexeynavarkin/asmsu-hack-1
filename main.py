@@ -20,14 +20,12 @@ def test():
 
 
 def main():
-    print("Loading matrix.")
-    containers_sizes, matrix = load_from_file("data/matrix4.txt")
-    print("Generating combinations.")
-    combs = gen_combinations(containers_sizes, len(matrix))
+    print("Loading matrix...")
+    containers_sizes, matrix = load_from_file("data/matrix1.txt")
 
     q = []
-    print("Start solving.")
-    for comb in combs:
+    for comb in gen_combinations(containers_sizes, len(matrix)):
+        print(f"Start solving: {comb}")
         task = Task(
             matrix=matrix,
             containers=comb,
@@ -35,7 +33,9 @@ def main():
         task.solve()
         q.append(task.calc_q())
 
-    print(f'\nMin q = {min(q)}')
+        print(f'Current min Q = {min(q)}\n\n')
+
+    print(f'\nMin Q = {min(q)}')
 
 
 if __name__ == "__main__":

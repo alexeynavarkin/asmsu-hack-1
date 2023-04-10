@@ -1,17 +1,22 @@
+from __future__ import annotations
+
 import itertools
 
 
-def gen_combinations(size: list[int], target: int):
-    res = []
-    curr = []
-    has_gen_started = False
-    i = 1
+def gen_combinations(sizes: list[int], target: int, start: int | None = None):
+    i = start or int(target / max(sizes))
 
-    while len(curr) > 0 or not has_gen_started:
-        curr = list(sorted(el) for el in itertools.combinations_with_replacement(size, i) if sum(el) == target)
-        res.extend(curr)
+    has_non_zero_comb_found = True
+    has_comb_found = False
+
+    while has_non_zero_comb_found or not has_comb_found:
+
+        has_non_zero_comb_found = False
+        for el in itertools.combinations_with_replacement(sizes, i):
+
+            if sum(el) == target:
+                has_comb_found = True
+                has_non_zero_comb_found = True
+                yield el
+
         i += 1
-        if len(curr) > 0:
-            has_gen_started = True
-
-    return res

@@ -15,22 +15,19 @@ class Task:
         self._groups_idx_array = []
 
     def solve(self):
-        print("------ Solve started. ------")
+        print("------ Solve started ------")
         self.init_node_idx_array_and_containers()
 
         self._build_group_idx_array()
-        print(f"Start groups. {self.build_groups()}")
-        print(self._nodes_idx_array)
-        print(self._groups_idx_array)
-        print(self._containers)
+        print(f"Start groups {self.build_groups()}")
 
-        print(f"Initial package Q={self.calc_q()}.")
+        print(f"Initial package Q={self.calc_q()}\n")
 
         self.optimize_groups()
-        print(f"Optimized package Q={self.calc_q()}.")
+        print(f"Optimized package Q={self.calc_q()}")
 
-        print(f"Final groups. {self.build_groups()}")
-        print("------ Solve finished. ------")
+        print(f"Final groups {self.build_groups()}")
+        print("------ Solve finished ------")
 
         return self.build_groups()
 
@@ -195,9 +192,11 @@ class Task:
         """
         Оптимизирует размещение элементов по группам.
         """
+        total_swaps = 0
         for group_idx in range(len(self._containers) - 1):
-            print(f"Optimizing group {group_idx}.")
-            self.optimize_group_by_idx(group_idx)
+            total_swaps += self.optimize_group_by_idx(group_idx)
+
+        print(f'\nTotal swaps: {total_swaps}\n')
 
     def _build_group_idx_array(self):
         """
@@ -272,10 +271,6 @@ class Task:
                     index_j = node_idx_matrix_out
             delta_S.append(row)
 
-        # for row in delta_S:
-        #     print(row)
-        # print('\n')
-
         return index_i, index_j, max_elem
 
     def swap_nodes(self, i: int, j: int) -> None:
@@ -296,7 +291,7 @@ class Task:
                 self._matrix[k][i],
             )
 
-    def optimize_group_by_idx(self, group_idx: int):
+    def optimize_group_by_idx(self, group_idx: int) -> int:
         """
         Оптимизирует одну группу по Id.
         """
@@ -311,10 +306,12 @@ class Task:
             # print(f"Need to swap: {index_i} {index_j}, {max_elem}")
             swaps_cnt += 1
             if swaps_cnt > len(self._matrix) * 2:
-                print("Too many swaps probably loop.")
+                print("Too many swaps probably loop")
                 break
 
-        print(f"Group {group_idx} swaps {swaps_cnt}.")
+        print(f"Group {group_idx + 1}/{len(self._containers)} swaps {swaps_cnt}")
+
+        return swaps_cnt
 
     def calc_q(self):
         q = 0
