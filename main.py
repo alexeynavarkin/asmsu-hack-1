@@ -1,3 +1,5 @@
+import sys
+
 from task import Task
 from data import matrix_test
 from gen_combinations import gen_combinations
@@ -21,7 +23,7 @@ def test():
 
 def main():
     print("Loading matrix...")
-    containers_sizes, matrix = load_from_file("data/matrix1.txt")
+    containers_sizes, matrix = load_from_file(f"data/{sys.argv[1]}")
 
     q = []
     for comb in gen_combinations(containers_sizes, len(matrix)):
@@ -33,9 +35,9 @@ def main():
         task.solve()
         q.append(task.calc_q())
 
-        print(f'Current min Q = {min(q)}\n\n')
+        print(f"Current min Q = {min(q)}\n\n")
 
-    print(f'\nMin Q = {min(q)}')
+    print(f"\nMin Q = {min(q)}")
 
 
 if __name__ == "__main__":
