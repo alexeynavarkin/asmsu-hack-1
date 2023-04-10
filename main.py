@@ -1,5 +1,6 @@
 import sys
-from multiprocessing import Pool, cpu_count
+import time
+from multiprocessing import Pool, cpu_count, TimeoutError
 import logging
 
 from task import Task
@@ -12,6 +13,8 @@ logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] [%(processName)s] %(message)s",
 )
+
+MAX_QUEUE_LENGTH = 20
 
 
 def test():
@@ -44,15 +47,31 @@ def main():
 
     q = []
     res = []
+    start_cont_count = int(sys.argv[2]) if len(sys.argv) > 2 else None
+
     with Pool(processes=int(cpu_count() * 0.75)) as pool:
-        for comb in gen_combinations(containers_sizes, len(matrix)):
+        for comb in gen_combinations(
+            containers_sizes,
+            len(matrix),
+            start_cont_count,
+        ):
+            while pool._taskqueue.qsize() > MAX_QUEUE_LENGTH:
+                time.sleep(1)
+
             logging.info(f"Start solving: {comb}")
             res.append(pool.apply_async(solve, (matrix, comb)))
 
-        for r in res:
-            q.append(r.get())
+        while res:
+            for r in res:
+                try:
+                    result = r.get(timeout=1)
+                except TimeoutError:
+                    pass
+                else:
+                    q.append(result)
+                    res.remove(r)
 
-        logging.info(f"Min Q = {min(q)}")
+    logging.info(f"Min Q = {min(q)}")
 
 
 if __name__ == "__main__":
