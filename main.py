@@ -21,7 +21,7 @@ def test():
 
 def main():
     print("Loading matrix.")
-    containers_sizes, matrix = load_from_file("data/matrix1.txt")
+    containers_sizes, matrix = load_from_file("data/matrix4.txt")
     print("Generating combinations.")
     combs = gen_combinations(containers_sizes, len(matrix))
 
@@ -35,7 +35,9 @@ def main():
         task.solve()
         q.append(task.calc_q())
 
+    print(f'\nMin q = {min(q)}')
+
 
 if __name__ == "__main__":
-    test()
+    # test()
     main()
