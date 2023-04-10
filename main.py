@@ -1,9 +1,17 @@
 import sys
+from multiprocessing import Pool
+import logging
 
 from task import Task
 from data import matrix_test
 from gen_combinations import gen_combinations
 from helpers import load_from_file
+
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="[%(asctime)s] [%(processName)s] %(message)s",
+)
 
 
 def test():
@@ -21,23 +29,30 @@ def test():
     assert not groups, "Groups differs."
 
 
+def solve(matrix, containers) -> int:
+    task = Task(
+        matrix=matrix,
+        containers=containers,
+    )
+    task.solve()
+    return task.calc_q()
+
+
 def main():
-    print("Loading matrix...")
+    logging.info("Loading matrix")
     containers_sizes, matrix = load_from_file(f"data/{sys.argv[1]}")
 
     q = []
-    for comb in gen_combinations(containers_sizes, len(matrix)):
-        print(f"Start solving: {comb}")
-        task = Task(
-            matrix=matrix,
-            containers=comb,
-        )
-        task.solve()
-        q.append(task.calc_q())
+    res = []
+    with Pool(processes=8) as pool:
+        for comb in gen_combinations(containers_sizes, len(matrix)):
+            logging.info(f"Start solving: {comb}")
+            res.append(pool.apply_async(solve, (matrix, comb)))
 
-        print(f"Current min Q = {min(q)}\n\n")
+        for r in res:
+            q.append(r.get())
 
-    print(f"\nMin Q = {min(q)}")
+        logging.info(f"Min Q = {min(q)}")
 
 
 if __name__ == "__main__":

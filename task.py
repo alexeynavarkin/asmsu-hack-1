@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import logging
+
 from helpers import MatrixT
 
 
 class Task:
     def __init__(
-            self,
-            matrix: MatrixT,
-            containers: list[int],
+        self,
+        matrix: MatrixT,
+        containers: list[int],
     ) -> None:
         self._matrix = matrix
         self._containers: list[int] = containers
@@ -15,19 +17,19 @@ class Task:
         self._groups_idx_array = []
 
     def solve(self):
-        print("------ Solve started ------")
+        logging.info("------ Solve started ------")
         self.init_node_idx_array_and_containers()
 
         self._build_group_idx_array()
-        print(f"Start groups {self.build_groups()}")
+        logging.info(f"Start groups {self.build_groups()}")
 
-        print(f"Initial package Q={self.calc_q()}\n")
+        logging.info(f"Initial package Q={self.calc_q()}\n")
 
         self.optimize_groups()
-        print(f"Optimized package Q={self.calc_q()}")
+        logging.info(f"Optimized package Q={self.calc_q()}")
 
-        print(f"Final groups {self.build_groups()}")
-        print("------ Solve finished ------")
+        logging.info(f"Final groups {self.build_groups()}")
+        logging.info("------ Solve finished ------")
 
         return self.build_groups()
 
@@ -73,31 +75,31 @@ class Task:
 
             if len(appending_vertexes) == container:
                 for i in range(
-                        sum(self._containers[:container_idx]),
-                        sum(self._containers[:container_idx])
-                        + len(appending_vertexes),
+                    sum(self._containers[:container_idx]),
+                    sum(self._containers[:container_idx])
+                    + len(appending_vertexes),
                 ):
                     self.swap_nodes(
                         i,
                         self._nodes_idx_array.index(
                             appending_vertexes[
                                 i - sum(self._containers[:container_idx])
-                                ]
+                            ]
                         ),
                     )
 
     def _calc_fit_delta(
-            self,
-            node_idx: int,
-            siblings_idx: list[int],
-            curr_container_idx: int,
+        self,
+        node_idx: int,
+        siblings_idx: list[int],
+        curr_container_idx: int,
     ) -> int:
         """
         Вычисляет дельту для исключения узлов из группы.
         """
         siblings_sum = sum(
             self._matrix[node_idx][
-            sum(self._containers[:curr_container_idx]):
+                sum(self._containers[:curr_container_idx]) :
             ]
         )
         group_sum = sum(
@@ -108,10 +110,10 @@ class Task:
         return siblings_sum - group_sum
 
     def fit_nodes_to_size(
-            self,
-            nodes_idx_array: list[int],
-            target_size: int,
-            curr_container_idx: int,
+        self,
+        nodes_idx_array: list[int],
+        target_size: int,
+        curr_container_idx: int,
     ) -> list[int]:
         """
         Уменьшает размер группы до необходимого.
@@ -135,7 +137,7 @@ class Task:
         return nodes_idx_array
 
     def _get_min_indexes(
-            self, curr_container_idx: int, exclude_vertexes: list[int]
+        self, curr_container_idx: int, exclude_vertexes: list[int]
     ):
         raw_exclude_vertexes = [
             self._nodes_idx_array[i] for i in exclude_vertexes
@@ -151,7 +153,7 @@ class Task:
             min_sums_rows,
             key=lambda vertex: max(
                 self._matrix[vertex][
-                sum(self._containers[:curr_container_idx]):
+                    sum(self._containers[:curr_container_idx]) :
                 ]
             ),
         )
@@ -159,14 +161,14 @@ class Task:
         return [
             self._nodes_idx_array[
                 i + sum(self._containers[:curr_container_idx])
-                ]
+            ]
             for i in raw_idx
         ]
 
     def _count_vertex_sum(self, curr_container_idx: int) -> list[int]:
         res = []
-        for line in self._matrix[sum(self._containers[:curr_container_idx]):]:
-            res.append(sum(line[sum(self._containers[:curr_container_idx]):]))
+        for line in self._matrix[sum(self._containers[:curr_container_idx]) :]:
+            res.append(sum(line[sum(self._containers[:curr_container_idx]) :]))
 
         return res
 
@@ -175,7 +177,7 @@ class Task:
             index
             for index, item in enumerate(
                 self._matrix[vertex_idx][
-                sum(self._containers[:curr_container_idx]):
+                    sum(self._containers[:curr_container_idx]) :
                 ]
             )
             if item != 0
@@ -184,7 +186,7 @@ class Task:
         return [
             self._nodes_idx_array[
                 i + sum(self._containers[:curr_container_idx])
-                ]
+            ]
             for i in raw_idx
         ]
 
@@ -196,7 +198,7 @@ class Task:
         for group_idx in range(len(self._containers) - 1):
             total_swaps += self.optimize_group_by_idx(group_idx)
 
-        print(f'\nTotal swaps: {total_swaps}\n')
+        logging.info(f"\nTotal swaps: {total_swaps}\n")
 
     def _build_group_idx_array(self):
         """
@@ -237,10 +239,12 @@ class Task:
         S_ij = self._matrix[i][j] * 2  # Связи между собой.
         i_group = self.get_group_idx_by_node_idx(self._nodes_idx_array[i])
         j_group = self.get_group_idx_by_node_idx(self._nodes_idx_array[j])
-        delta_S_i = self.get_delta(j_group, self._nodes_idx_array[i]) - self.get_delta(i_group,
-                                                                                       self._nodes_idx_array[i])
-        delta_S_j = self.get_delta(i_group, self._nodes_idx_array[j]) - self.get_delta(j_group,
-                                                                                       self._nodes_idx_array[j])
+        delta_S_i = self.get_delta(
+            j_group, self._nodes_idx_array[i]
+        ) - self.get_delta(i_group, self._nodes_idx_array[i])
+        delta_S_j = self.get_delta(
+            i_group, self._nodes_idx_array[j]
+        ) - self.get_delta(j_group, self._nodes_idx_array[j])
         return delta_S_i + delta_S_j - S_ij
 
     def find_to_swap(self, group_idx: int) -> tuple[int, int, int]:
@@ -253,11 +257,14 @@ class Task:
 
         delta_S = []
 
-        for node_idx_matrix in range(self._groups_idx_array[group_idx], self._groups_idx_array[group_idx + 1]):
+        for node_idx_matrix in range(
+            self._groups_idx_array[group_idx],
+            self._groups_idx_array[group_idx + 1],
+        ):
             row = []
             for node_idx_matrix_out in range(
-                    self._groups_idx_array[group_idx + 1],
-                    len(self._matrix),
+                self._groups_idx_array[group_idx + 1],
+                len(self._matrix),
             ):
                 weight = self.find_permutation_weight(
                     node_idx_matrix,
@@ -303,13 +310,15 @@ class Task:
             assert index_j is not None
             self.swap_nodes(index_i, index_j)
             index_i, index_j, max_elem = self.find_to_swap(group_idx)
-            # print(f"Need to swap: {index_i} {index_j}, {max_elem}")
+            # logging.info(f"Need to swap: {index_i} {index_j}, {max_elem}")
             swaps_cnt += 1
             if swaps_cnt > len(self._matrix) * 2:
-                print("Too many swaps probably loop")
+                logging.info("Too many swaps probably loop")
                 break
 
-        print(f"Group {group_idx + 1}/{len(self._containers)} swaps {swaps_cnt}")
+        logging.info(
+            f"Group {group_idx + 1}/{len(self._containers)} swaps {swaps_cnt}"
+        )
 
         return swaps_cnt
 
