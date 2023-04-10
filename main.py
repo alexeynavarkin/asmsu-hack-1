@@ -14,7 +14,8 @@ logging.basicConfig(
     format="[%(asctime)s] [%(processName)s] %(message)s",
 )
 
-MAX_QUEUE_LENGTH = 20
+PROCESS_COUNT = 2
+MAX_QUEUE_LENGTH = PROCESS_COUNT * 2
 
 
 def test():
@@ -49,7 +50,7 @@ def main():
     res = []
     start_cont_count = int(sys.argv[2]) if len(sys.argv) > 2 else None
 
-    with Pool(processes=int(cpu_count() * 0.75)) as pool:
+    with Pool(PROCESS_COUNT) as pool:
         for comb in gen_combinations(
             containers_sizes,
             len(matrix),
